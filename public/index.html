@@ -1,0 +1,94 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>TikTok Video Downloader</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div class="container">
+            <h1>TikTok Video Downloader</h1>
+            <p>Enter a TikTok video URL to download</p>
+            <input
+                type="text"
+                id="url-input"
+                placeholder="Enter TikTok video URL"
+            />
+            <button id="download-btn">Download</button>
+            <div id="error" class="error"></div>
+            <div id="video-info" class="video-info"></div>
+            <div class="footer">
+                Note: Please ensure you have the right to download and use the
+                video content.
+            </div>
+            <div class="copyright">© 2024 Haru. All rights reserved.</div>
+        </div>
+
+        <script>
+            const urlInput = document.getElementById("url-input");
+            const downloadBtn = document.getElementById("download-btn");
+            const errorDiv = document.getElementById("error");
+            const videoInfoDiv = document.getElementById("video-info");
+
+            downloadBtn.addEventListener("click", handleDownload);
+
+            async function handleDownload() {
+                const url = urlInput.value;
+                if (!url) {
+                    showError("Please enter a valid TikTok video URL");
+                    return;
+                }
+
+                setLoading(true);
+                clearError();
+                clearVideoInfo();
+
+                try {
+                    const response = await fetch(
+                        `/download?url=${encodeURIComponent(url)}`,
+                    );
+                    const data = await response.json();
+
+                    if (data) {
+                        displayVideoInfo(data.result);
+                    } else {
+                        showError(
+                            "Failed to fetch video data. Please check the URL and try again.",
+                        );
+                    }
+                } catch (err) {
+                    alert(err.message);
+                    showError(err.message);
+                } finally {
+                    setLoading(false);
+                }
+            }
+
+            function setLoading(isLoading) {
+                downloadBtn.disabled = isLoading;
+                downloadBtn.textContent = isLoading ? "Loading..." : "Download";
+            }
+
+            function showError(message) {
+                errorDiv.textContent = message;
+            }
+
+            function clearError() {
+                errorDiv.textContent = "";
+            }
+
+            function clearVideoInfo() {
+                videoInfoDiv.innerHTML = "";
+            }
+
+            function displayVideoInfo(data) {
+                videoInfoDiv.innerHTML = `
+              <video src="${data}" controls></video>
+              <a href="${data}" class="download-btn" download target="_blank" rel="noopener noreferrer">
+                  Download Without Watermark
+              </a>
+          `;
+            }
+        </script>
+    </body>
+</html>
